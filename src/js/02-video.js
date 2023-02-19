@@ -3,6 +3,7 @@ import Player from '@vimeo/player';
 
 const iframe = document.querySelector('iframe');
 const player = new Player(iframe);
+const STORAGE_KEY = 'videoplayer-current-time';
 
 player.on('play', function() {
     console.log('played the video!');
@@ -13,23 +14,16 @@ player.getVideoTitle().then(function(title) {
 
 
 
-const currentTime = function (data) {
-    localStorage.setItem('videoplayer-current-time', JSON.stringify(data.seconds));
+const onTimeUpdate = function (data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data.seconds));
 
-    let time = Number(localStorage.getItem('videoplayer-current-time'));
+    let time = Number(localStorage.getItem(STORAGE_KEY));
 
     console.log(time);
 };
 
-const onPlay = player.on('timeupdate', throttle(currentTime, 1000));
+player.on ('timeupdate', throttle(onTimeUpdate, 1000));
 
-player
-    .setCurrentTime(30)
-    .then(function(seconds) {})
-    .catch(function (error) {
-        switch (error.name) {
-            case 'RangeError':
-                break;
-            default: break;
-        }
-    })
+const currentTime = localStorage.getItem(STORAGE_KEY);
+
+player.setCurrentTime(currentTime)
